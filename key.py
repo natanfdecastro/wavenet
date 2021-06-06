@@ -2,7 +2,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from binascii import hexlify
 
-key_length = 1024
+key_length = 4096
 
 
 def generate_keys():

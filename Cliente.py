@@ -25,7 +25,8 @@ dwn = DWN()
 
 def get_public_keys(socket_, command):
     socket_.send(bytes(command, 'UTF-8'))
-    data = socket_.recv(1024)
+    data = socket_.recv(4096)
+    print('Largo de la ostia recibida', len(data))
     data = data.decode('UTF-8')
     print("Data: ", data)
     keys = data.split(' | ')
@@ -69,8 +70,8 @@ def receive_data():
 
 
 def send_data(socket_, command):
-    source = 1#int(hash(host))
-    destination = 1#hash(command[4:])
+    source = abs(hash(host))
+    destination = abs(hash(command[4:]))
     public_keys = get_public_keys(socket_, command)
     for i in public_keys:
         print(type(i))
@@ -79,16 +80,16 @@ def send_data(socket_, command):
     file_binary = get_file_binaries(file_name)
     init_package = create_packets_from_bins(source, destination, file_binary, 1)
     print("Init: ", init_package)
-    print("Public Keys: ", public_keys[-1])
-    # init_package = cipher_data(init_package, public_keys[0])
-    '''
+    init_package = cipher_data(init_package, public_keys[-1])
     for key in public_keys[1:-1]:
         init_package = create_packets_from_bins(source, destination, init_package, 1)
-        init_package = cipher_data(init_package, key)
+        print('2', init_package)
+        # init_package = cipher_data(init_package, key)
+        print('3', init_package)
     init_package = create_packets_from_bins(source, destination, init_package, 1)
-    '''
-    init_package = cipher_data(init_package, public_keys[-1])
-
+    print('4', init_package)
+    init_package = cipher_data(init_package, public_keys[0])
+    print('fin', init_package)
     init_package = [[int(n) for n in bin(byte)[2:].zfill(8)] for byte in init_package]
     # init_package = create_bin_packets(1, 2, init_package, version=1)
     print(init_package)  # enviar a sonar

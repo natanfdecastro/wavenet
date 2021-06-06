@@ -35,7 +35,9 @@ def routing(source, destine):
             keys.append(key)
             keys.append('|')
             hops -= 1
+    print(nodes.get(destine))
     keys.append(nodes.get(destine))
+    print(keys)
     return convert_list_to_string(keys)
 
 
@@ -53,6 +55,7 @@ def generate_response(connection, address):
         if 'send' == data[0]:
             keys = routing(address[0], data[1])
             connection.send(bytes(keys, 'UTF-8'))
+            logging.info(f"{len(bytes(keys, 'UTF-8'))}")
             logging.info(f'{address[0]} send: host public keys')
     nodes.pop(address[0])
     print("F para", address[0])

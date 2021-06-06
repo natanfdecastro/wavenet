@@ -129,7 +129,7 @@ def create_packets_from_bins(source, destiny, bins, version=1):  # Message is a 
     current_length = length if length <= max_data_len else max_data_len  # Definir el tamaño del data en constante
     new_packet = WaveNetPacket(version=version, src_id=source, dst_id=destiny,
                                checksum=None, len=length, data=bins)  # ''.join(map(chr, bins[:max_data_len])))
-
+    new_packet.show()
     # Calcular y ponerle checksum
 
     binaries = scapy.raw(new_packet)
