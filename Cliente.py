@@ -55,7 +55,9 @@ def decipher_data(data, key):
 
 
 def receive_data():
+    print("Escuchando")
     data = dwn.listen()
+    print(data)
     data = data_to_bits(data)
     try:
         data = decipher_data(data, private)
@@ -67,8 +69,8 @@ def receive_data():
 
 
 def send_data(socket_, command):
-    source = int(hash(host))
-    destination = hash(command[4:])
+    source = 1#int(hash(host))
+    destination = 1#hash(command[4:])
     public_keys = get_public_keys(socket_, command)
     for i in public_keys:
         print(type(i))
@@ -97,7 +99,7 @@ def cli(socket_):
     command = str(input())
     if command[:4] == 'send':
         send_data(socket_, command)
-    if command[:6] == 'receive':
+    if command == 'receive':
         receive_data()
 
 try:

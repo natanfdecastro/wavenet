@@ -8,7 +8,7 @@ class DWN:
     def __init__(self):
         self.node_list = list()
         self.max_frame_size = 128
-        self.sound_duration = 130
+        self.sound_duration = 1000
 
     def sound(self, frequency, duration=0):
         duration = self.sound_duration
@@ -17,20 +17,22 @@ class DWN:
     def send(self, data):
         # data_to_bits : seria un pasar a lista de 1 y 0
         data = list(chain(*data))#[item for sublist in data for item in sublist]
-        start_frequency = 22000
-        split_frequency = 17000
+        start_frequency = 17000
+        split_frequency = 15000
         # self.sound(start_frequency) # comentar si no es un while true
+        print(f"******************************************************************{len(data)}******************************************************************")
         for i in data:
             if i:
-                frequency = 20000
+                frequency = 16000
                 self.sound(frequency)
             else:
-                frequency = 15000
+                frequency = 14000
                 self.sound(frequency)
             self.sound(split_frequency)
         self.sound(start_frequency)
 
     def listen(self):
+        print(">>> [Listening for WaveNET package...]")
         data = []
         chunk_size = 4096
         rate = 44100
@@ -50,15 +52,15 @@ class DWN:
             frequency = np.fft.fftfreq(chunk_size, 1.0 / rate)
             frequency = frequency[:int(len(frequency) / 2)]
             frequency_top = frequency[np.where(fft == np.max(fft))[0][0]] + 1
-            if frequency_top > 14900:
+            if frequency_top > 13000:
                 print(frequency_top)
-                if 19500 < frequency_top < 20500:
+                if 15500 < frequency_top < 16500:
                     data.append(1)
-                if 16500 < frequency_top < 17500:
-                    data.append(2)
                 if 14500 < frequency_top < 15500:
+                    data.append(2)
+                if 13500 < frequency_top < 14500:
                     data.append(0)
-                if 21500 < frequency_top < 22500:
+                if 16500 < frequency_top < 17500:
                     listening = False
         data = self.clean_frequency(data)
         print(data)
