@@ -70,38 +70,6 @@ def get_public_keys(socket_, command):
     return public_keys
 
 
-def cipher_data(data, key):
-    """
-    Función que se encarga de cifrar la información por medio de el
-    cifrador asimétrico PKCS#1 OAEP basado en RSA.
-    :param data: binarios a firmar
-    :param key: llave pública RSA
-    :return: datos binarios cifrados
-    """
-    cipher = PKCS1_OAEP.new(key=key)
-    cipher_data = b''
-    for i in range(0, len(data), key_length):
-        cipher_data += (cipher.encrypt(data[i:i * key_length]))
-    print(cipher_data)
-    return cipher_data
-
-
-def decipher_data(data, key):
-    """
-    Función que se encarga de descifrar la información por medio
-    de el cifrador asimétrico PKCS#1 OAEP basado en RSA.
-    :param data: binarios a descifrar
-    :param key: llave privada PSA
-    :return:
-    """
-    decrypt = PKCS1_OAEP.new(key=key)
-    decrypted_data = b''
-    for i in range(0, len(data), key_length):
-        decrypted_data += (decrypt.decrypt(data[i:i * key_length]))
-    print(decrypted_data)
-    return decrypted_data
-
-
 def receive_data():
     """
     Función que se encarga de por instanciar al estado actual de dispositivo
@@ -148,13 +116,13 @@ def send_data(socket_, command):
     init_package = cipher_data(init_package, public_keys[-1])
     for key in public_keys[1:-1]:
         init_package = create_packets_from_bins(source, destination, init_package, 1)
-        print('2', init_package)
+        print(f'for {key}:', init_package)
         init_package = cipher_data(init_package, key)
-        print('3', init_package)
+        print(f'for cipher', init_package)
     init_package = create_packets_from_bins(source, destination, init_package, 1)
-    print('4', init_package)
+    print('Out for', init_package)
     init_package = cipher_data(init_package, public_keys[0])
-    print('fin', init_package)
+    print('End package', init_package)
     init_package = [[int(n) for n in bin(byte)[2:].zfill(8)] for byte in init_package]
     # init_package = create_bin_packets(1, 2, init_package, version=1)
     print(init_package)
@@ -177,8 +145,9 @@ def cli(socket_):
 Se establece la conexión con el servidor
 """
 try:
-    print(socket.recv(1024))
-    print(len(bytes(public, 'UTF-8')))
+    print(socket.recv(1024).decode('UTF-8'))
+    print(">>> Sending public key")
+    print("Key length: ", len(bytes(public, 'UTF-8')))
     socket.send(bytes(public, 'UTF-8'))
     while True:
         cli(socket)

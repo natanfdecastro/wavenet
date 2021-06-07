@@ -71,9 +71,9 @@ def routing(source, destine):
     el destinatario y el remitente) y para definir el orden de los nodos que se seguirá.
     :param source: string dirección IP de origen
     :param destine: string dirección IP de destino
-:return: lista con llaves públicas de nodos por los que se enviaran los datos
+    :return: lista con llaves públicas de nodos por los que se enviaran los datos
     """
-    logging.info("Routing", source, destine)
+    logging.info(">>> Routing", source, destine)
     if not nodes.get(destine):
         return "Destine is not register"
     MAX = 2
@@ -122,7 +122,7 @@ def generate_response(connection, address):
     connection.close()  # Close the connection
 
 
-logging.info('Server running')
+logging.info('>>> Server running')
 
 with ThreadPoolExecutor(max_workers=thread_n) as executor:
     """
@@ -130,7 +130,7 @@ with ThreadPoolExecutor(max_workers=thread_n) as executor:
     """
     while True:
         connection, address = socket.accept()
-        logging.info(f'New connection from: {address}')
+        logging.info(f'>>> New connection from: {address}')
         try:
             result = executor.submit(generate_response, connection, address)
         except KeyboardInterrupt:

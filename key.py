@@ -44,3 +44,35 @@ def generate_keys():
     private_pem = private_key.exportKey().decode()
     public_pem = public_key.export_key().decode()
     return private_pem, public_pem
+
+
+def cipher_data(data, key):
+    """
+    Función que se encarga de cifrar la información por medio de el
+    cifrador asimétrico PKCS#1 OAEP basado en RSA.
+    :param data: binarios a firmar
+    :param key: llave pública RSA
+    :return: datos binarios cifrados
+    """
+    cipher = PKCS1_OAEP.new(key=key)
+    cipher_data = b''
+    for i in range(0, len(data), key_length):
+        cipher_data += (cipher.encrypt(data[i:i * key_length]))
+    print(cipher_data)
+    return cipher_data
+
+
+def decipher_data(data, key):
+    """
+    Función que se encarga de descifrar la información por medio
+    de el cifrador asimétrico PKCS#1 OAEP basado en RSA.
+    :param data: binarios a descifrar
+    :param key: llave privada PSA
+    :return:
+    """
+    decrypt = PKCS1_OAEP.new(key=key)
+    decrypted_data = b''
+    for i in range(0, len(data), key_length):
+        decrypted_data += (decrypt.decrypt(data[i:i * key_length]))
+    print(decrypted_data)
+    return decrypted_data
