@@ -150,8 +150,8 @@ def send_data(socket_, command):
     file_binary = get_file_binaries(file_name)
     init_package = create_packets_from_bins(source, destination, file_binary, 1)
     print("Init: ", init_package)
-    init_package = cipher_data(init_package, public_keys[-1])
-    for key in public_keys[1:-1]:
+    # init_package = cipher_data(init_package, public_keys[-1])
+    '''for key in public_keys[1:-1]:
         init_package = create_packets_from_bins(source, destination, init_package, 1)
         print('2', init_package)
         init_package = cipher_data(init_package, key)
@@ -159,7 +159,7 @@ def send_data(socket_, command):
     init_package = create_packets_from_bins(source, destination, init_package, 1)
     print('4', init_package)
     init_package = cipher_data(init_package, public_keys[0])
-    print('fin', init_package)
+    print('fin', init_package)'''
     init_package = [[int(n) for n in bin(byte)[2:].zfill(8)] for byte in init_package]
     # init_package = create_bin_packets(1, 2, init_package, version=1)
     print(init_package)

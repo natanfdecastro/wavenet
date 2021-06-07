@@ -122,6 +122,8 @@ def generate_response(connection, address):
     connection.close()  # Close the connection
 
 
+logging.info('Server running')
+
 with ThreadPoolExecutor(max_workers=thread_n) as executor:
     """
     Pool de Threads, por cada conexión realizada se asigna un hilo para las tareas
