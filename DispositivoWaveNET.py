@@ -7,17 +7,39 @@ from itertools import groupby, chain
 
 
 class DWN:
+    """
+    Clase que se encarga de manejar la información en un dispositivo wavenet.
+    La cual tiene como atributos la lista de nodos, el tamaño máximo de un paquete
+    y la duración de un sonido de 1 segundo (1000 ms)
+    """
     def __init__(self):
+        """
+        Constructor de la clase
+        """
         self.node_list = list()
         self.max_frame_size = 128
         self.sound_duration = 200
 
     def sound(self, frequency, duration=0):
+        """
+        Función que se encarga de reproducir sonidos dentro de la red,
+        recive una frecuencia y el tiempo por el que se va a emitir el sonido,
+        se realiza una llamada al sistema para hacer uso de la bilioteca SoX (Sound eXchange),
+        la cual permite emitir sonidos en el sistema Linux.
+        :param frequency: valor de frecuencia
+        :param duration: tiempo que se emite el sonido
+        :return:
+        """
         duration = self.sound_duration
         os.system('play -n -q synth %s sin %s' % (duration / 1000, frequency))  # todo add -q Make SoX not show output
 
     def send(self, data):
-        # data_to_bits : seria un pasar a lista de 1 y 0
+        """
+        Función que se encarga de escuchar por frecuencias que puedan coincidir con las
+        definidas para representar bits en el programa y frecuencias especiales (de separación
+        y de finalización). Guarda en una lista el resultado de los símbolos recuperados.
+        :param data: lista de 1 y 0
+        """
         data = list(chain(*data))#[item for sublist in data for item in sublist]
         start_frequency = 16000
         split_frequency = 13000
@@ -36,6 +58,12 @@ class DWN:
         self.sound(start_frequency, 1000)
 
     def listen(self):
+        """
+        Función que se encarga de limpiar los resultados obtenidos de la
+        lista de datos recividos, recibe una lista con valores de: 1, 0 y
+        2, donde [2] es para diferenciar el inicio y fin de un bit
+        :return: lista de 1 y 0
+        """
         print(">>> [Listening for WaveNET package...]")
         data = []
         chunk_size = 4096
@@ -82,6 +110,13 @@ class DWN:
         return data
 
     def clean_frequency(self, data):
+        """
+        Función que se encarga de limpiar los resultados obtenidos de la lista
+        de datos recividos, recibe una lista con valores de: 1, 0 y 2, donde [2]
+        es para diferenciar el inicio y fin de un bit.
+        :param data:
+        :return:
+        """
         result = []
         for element in groupby(data):
             if element[0] != 2:

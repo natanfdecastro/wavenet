@@ -24,23 +24,11 @@ Copyright (C) 2021 Brandon, Walter Bytes, Natan & Kenny
     Walter Antonio Morales Vásquez - 2018212846
 ========================================================================
 """
-from Crypto.Cipher import PKCS1_OAEP
-from Crypto.PublicKey import RSA
-from binascii import hexlify
+from DispositivoWaveNET import *
 
-key_length = 1024
-
-
-def generate_keys():
-    """
-    Función encargada de generar las llaves publicas y privadas de cada usuario en la red.
-    Se utiliza la biblioteca de Python Crypto, la cual contiene una clase para generar claves
-    de RSA de N bits.
-    :return Llave privada y pública del cliente
-    """
-    private_key = RSA.generate(key_length)
-    public_key = private_key.publickey()
-    print(type(private_key), type(public_key))
-    private_pem = private_key.exportKey().decode()
-    public_pem = public_key.export_key().decode()
-    return private_pem, public_pem
+device = DWN()
+import time
+start = time.time()
+message = [[1, 0], [0, 1], [1, 0], [1, 0, 1, 0, 1], [1, 0, 1, 0, 1]]
+device.send(message)
+print(f'Tiempo: {time.time() - start}')

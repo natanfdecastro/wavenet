@@ -1,112 +1,90 @@
-import scapy.all as scapy
+"""
+======================================================================
+Copyright (C) 2021 Brandon, Walter Bytes, Natan & Kenny
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see https://www.gnu.org/licenses/.
 
-# Parte de la versión?
-version_bytes = 2  # VER_BYTES
-destiny_bytes = 8  # VER_BYTES
-source_bytes = 8  # VER_BYTES
-chksum_bytes = 4  # VER_BYTES
-length_bytes = 2  # VER_BYTES
+    Instituto Tecnologico de Costa Rica
+    Redes Locales - IC-7602
+
+    WaveNET (wavenet)
+    Disponible en: https://github.com/natanfdecastro/wavenet
+
+    Natan Fernandez de Castro - 2017105774
+    Kenneth Rodriguez Murillo - 2018132752
+    Brandon Josué Ledezma Fernández - 2018185574
+    Walter Antonio Morales Vásquez - 2018212846
+========================================================================
+"""
+
+import scapy.all as scapy
+import time
+
+version_bytes = 2
+destiny_bytes = 8
+source_bytes = 8
+chksum_bytes = 4
+length_bytes = 2
 max_data_len = 104
 
 
 class WaveNetPacket(scapy.Packet):
+    """
+    Tiene los atributos de la lista de una lista con la descripción de un
+    paquete, la cual contiene: (version), id del destino (dst_id),  id del origen (src_id),
+    suma de comprobación (checksum), largo (len) y la información (data)
+    """
     name = "WaveNetPacket"
-
-    '''
-    ShortField -> 2 bytes
-    XByteField -> 1 byte, por la X prefiere la representación hex
-    IntField
-    StrLenField("Omer", "", None)
-    '''
-
     fields_desc = [scapy.ShortField("version", 1),
                    scapy.LongField("dst_id", 8888),
                    scapy.LongField("src_id", 8888),
-                   scapy.XIntField("checksum", None),  # Puede ser x o None
-                   scapy.ShortField("len", None),  # Realmente el largo cabe en un byte
-                   scapy.StrLenField("data", "")]  # Tamaño max_data_len
+                   scapy.XIntField("checksum", None),
+                   scapy.ShortField("len", None),
+                   scapy.StrLenField("data", "")]
 
-
-'''
-2 + 4 + 4 + 4 + 2
-
-16 bytes
-Total = 128
-'''
-
-
-# a = WaveNetPacket(dst_id=12, checksum=12234, len=7, data="abcdf12")
-# b = scapy.raw(a)
-
-# print(f"Packet {a.show()}")
-# print(f"Raw {b}")
-
-# def decode_bytes(bin_packet):
-
-# 	to_return = WaveNetPacket
-# 	return to_return
-
-def caesar_cipher(key, bin_data):
-    new_data = bytearray()
-    for elem in bin_data:
-        new_data.append((elem + key) % 255)
-    return new_data
-
-
-def caesar_decipher(key, bin_data):
-    new_data = bytearray()
-    for elem in bin_data:
-        new_data.append((elem - key) % 255)
-    return new_data
-
-
-# print(list(bytes(string,"ascii")))
-# print(list(file.read()))
-
-# byte a string
-
-# Pasar el message a array binario?
-# def create_bin_packets(source, destiny, message, version = 1): # Message is a list of bytes
-
-# 	length = len(message)
-
-# 	packets_list = []
-# 	while(length > 0):
-
-# 		current_length = length if length<=max_data_len else max_data_len # Definir el tamaño del data en constante
-# 		new_packet = WaveNetPacket(version = version, src_id = source, dst_id = destiny, 
-# 			checksum = None, len = current_length, data = bytearray(message[:max_data_len]))#''.join(map(chr, message[:max_data_len])))
-
-# 		# Calcular y ponerle checksum
-
-# 		binaries = scapy.raw(new_packet)
-# 		packets_list.append([[int(n) for n in bin(byte)[2:].zfill(8)] for byte in binaries])
-
-# 		message = message[max_data_len:]
-# 		length -= max_data_len
-
-# 	return packets_list
 
 def send_file(source, destiny, file_path, version=1):  # create packets from file
-
+    """
+    Función que se encarga de crear los paquetes a partir de un archivo,
+    el cual lo abre, lee la información (data) y le agrega la descripción
+    con la nueva información al paquete.
+    :param source: direccion origen
+    :param destiny: direccion destino
+    :param file_path: ruta de un archivo
+    :param version: versión del paquete
+    :return: binarios del archivo
+    """
     file = open(file_path, "rb")
-    message = list(file.read())  # if message is string list(bytes(string,"ascii"))
-
+    message = list(file.read())  # si el mensaje es string list(bytes(string,"ascii"))
     file.close()
     return create_bin_packets(source, destiny, message, version=1)
 
 
-def create_bin_packets(source, destiny, bins, version=1):  # bins is a list of bytes
-
-    print(bins)
+def create_bin_packets(source, destiny, bins, version=1):
+    """
+     Función que se encarga de crear un paquete en  binario según
+     la información suministrada por parámetro. Retornando una lista de unos y ceros.
+    :param source: direccion origen
+    :param destiny: direccion destino
+    :param bins: datos binarios
+    :param version: versión del paquete
+    :return: WaveNetPacket
+    """
     length = len(bins)
-    print('length', length)
-
     packets_list = []
     while (length > 0):
         current_length = length if length <= max_data_len else max_data_len  # Definir el tamaño del data en constante
         new_packet = WaveNetPacket(version=version, src_id=source, dst_id=destiny,
-                                   checksum=None, len=current_length, data=bins[:max_data_len])  # ''.join(map(chr, bins[:max_data_len])))
+                                   checksum=None, len=current_length,
+                                   data=bins[:max_data_len])  # ''.join(map(chr, bins[:max_data_len])))
 
         # Calcular y ponerle checksum
         new_packet.show()
@@ -119,49 +97,50 @@ def create_bin_packets(source, destiny, bins, version=1):  # bins is a list of b
     return packets_list
 
 
-# Crear paquetes un arreglo de bits
-def create_packets_from_bins(source, destiny, bins, version=1):  # Message is a list of bytes
-
+def create_packets_from_bins(source, destiny, bins, version=1):
+    """
+    Función que se encarga de crear un paquete, lo convierte a binario y luego lo retorna
+    :param source: direccion origen
+    :param destiny: direccion destino
+    :param bins: datos binarios
+    :param version: versión del paquete
+    :return: paquetes
+    """
     length = len(bins)
 
     packets_list = b''
 
-    current_length = length if length <= max_data_len else max_data_len  # Definir el tamaño del data en constante
+    current_length = length if length <= max_data_len else max_data_len
     new_packet = WaveNetPacket(version=version, src_id=source, dst_id=destiny,
-                               checksum=None, len=length, data=bins)  # ''.join(map(chr, bins[:max_data_len])))
+                               checksum=None, len=length, data=bins)
     new_packet.show()
-    # Calcular y ponerle checksum
 
     binaries = scapy.raw(new_packet)
     packets_list += binaries
 
-    # bins = bins[max_data_len:]
-    # length -= max_data_len
-
     return packets_list
 
 
-def get_file_binaries(file_path):  # create bitarray from file
-
+def get_file_binaries(file_path):
+    """
+    Función utilizada para obtener los binarios de un archivo para enviarlo a otro nodo de la red.
+    :param file_path: ruta del archivo
+    :return: binario del archivo
+    """
     file = open(file_path, "rb")
-    message = file.read()  # if message is string list(bytes(string,"ascii"))
+    message = file.read()
 
     file.close()
     return message
 
 
-# bin_packets = create_bin_packets(1, 2, 'mensaje prueba', 1)
-# print('', *bin_packets[0], sep='\n')
-
-# bin_packets = create_bin_packets(1, 2, 
-# 	"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111\
-# 	1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111", 1)
-# print("Bin packet", *bin_packets, sep='\n')
-
-
-
-
 def decode_packets(bin_packets_list):
+    """
+    Función que recibe una lista de unos y ceros que para cada paquete
+    se encarga de generar un paquete de WaveNetPacket por cada 128 bits.
+    :param bin_packets_list:
+    :return:
+    """
     packets_list = []
     print('bin_packets_list', bin_packets_list)
     for packet in bin_packets_list:
@@ -174,16 +153,13 @@ def decode_packets(bin_packets_list):
 
             for bit in byte:
                 version = (version << 1) | bit
-
-        # if version not in diccionario versiones?
-
-        destiny = 0
+        destine = 0
         left_index = right_index
         right_index = left_index + destiny_bytes
         for byte in packet[left_index:right_index]:
 
             for bit in byte:
-                destiny = (destiny << 1) | bit
+                destiny = (destine << 1) | bit
 
         source = 0
         left_index = right_index
@@ -217,29 +193,30 @@ def decode_packets(bin_packets_list):
             temp = 0
             for bit in byte:
                 temp = (temp << 1) | bit
-
             message.append(temp)
 
-        new_packet = WaveNetPacket(version=version, src_id=source, dst_id=destiny,
+        new_packet = WaveNetPacket(version=version, src_id=source, dst_id=destine,
                                    checksum=None, len=length, data=message)
 
         '''
-		if calcularchecksum() != checksum
-			Errors correction
-	
-		'''
+        if calcularchecksum() != checksum
+         Errors correction
+        '''
 
         packets_list.append(new_packet)
     return packets_list
 
 
 def decode_bins(bin_from_packet):
+    """
+     Función utilizada para crear un paquete con la información recibida en los parametros obtenidos.
+    :param bin_from_packet:
+    :return:
+    """
     left_index = 0
     right_index = version_bytes
 
     version = int.from_bytes(bin_from_packet[:right_index], "big")
-
-    # if version not in diccionario versiones?
 
     left_index = right_index
     right_index = left_index + destiny_bytes
@@ -263,101 +240,29 @@ def decode_bins(bin_from_packet):
 
     new_packet = WaveNetPacket(version=version, src_id=source, dst_id=destiny,
                                checksum=None, len=length, data=message)
-    '''
-	if calcularchecksum() != checksum
-		Errors correction
 
-	'''
-
-    # packets_list.append(new_packet)
     return new_packet
 
 
 def data_to_bits(data):
+    """
+    Función encargada de convertir una lista compuesta de 1 y 0
+    con el fin de convertir su contenido en un dato binario.
+    :param data: lista de 1 y 0
+    :return: dato en binario
+    """
     return bin(int(''.join(map(str, data)), 2) << 1)
 
 
-'''
-byte_arr = [65,66,67,68] 
-some_bytes = bytearray(byte_arr)
-
-immutable_bytes = bytes(some_bytes)
-with open("my_file.txt", "wb") as binary_file: # Abrir el archivo como la hora
-    binary_file.write(immutable_bytes)
-'''
-
-import time
-
-
 def receive_file(packets):
-    # packets = decode_packets(bin_packets_list)
+    """
+     Función que se encarga de crear un nuevo archivo con los datos binarios
+     que recibe. es creado con la fecha y hora del momento en que esta función es llamada.
+    :param packets: lista de WaveNetPacket
+    """
     file = open(time.strftime("%Y-%m-%d_%H:%M:%S"), "wb")
 
     for elem in packets:
         file.write(elem)
 
     file.close()
-
-
-# return packets
-
-'''
-arr = get_file_binaries('prueba.txt')
-arr2 = create_packets_from_bins(1, 2, arr, version=1)
-
-# print(arr2)
-arr3 = create_bin_packets(1, 2, arr2, version=1)
-
-# print(arr3)
-# arr3[0][0].show()
-
-decoded_packets_list = decode_packets(arr3)
-
-l = []
-for elem in decoded_packets_list:
-    elem.show()
-    print(elem.data)
-    l.append(decode_bins(elem.data))
-
-print(l)'''
-
-# bin_packets = send_file(1, 2, '2021-06-03_14-43_1.png', 1)
-
-# decoded_packets_list = receive_file(bin_packets)
-
-# for elem in decoded_packets_list:
-# 	print(f"Paquete: {elem.show()}")
-
-'''
-Función para unir los mensajes?
-
-'''
-
-'''
-
-Pasar de bin a bits
-[int(n) for n in bin(b[1])[2:].zfill(8)]
-[int(n) for y in b for n in bin(y)[2:].zfill(8)]
-
-[[int(n) for n in bin(y)[2:].zfill(8)] for y in b]
-
-'''
-
-# def send_packet(destiny, dst_port, src_port, message, retry): # Message is a string
-
-# 	addr = ('255.255.255.255', src_port)  # 255. is the broadcast IP for UDP
-# 	send_socket = socket(AF_INET, SOCK_DGRAM)
-#     try:
-#         send_socket.sendto(message, addr)
-#     except Exception as e:
-#         print("Link failed to send packet over socket %s" % e)
-#         sleep(0.2)
-#         if retry:
-#             send_packet(destiny, dst_port, src_port, message, retry=False)
-
-# def send_packet2(destiny, dst_port, src_port, message):
-
-# 	packet=IP(dst=destiny)/TCP()/message
-# 	send(packet)
-
-# def receive_package():
