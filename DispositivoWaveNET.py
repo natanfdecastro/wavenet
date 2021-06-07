@@ -66,6 +66,7 @@ class DWN:
         """
         print(">>> [Listening for WaveNET package...]")
         data = []
+        result = []
         chunk_size = 4096
         rate = 44100
         channel_number = 1
@@ -102,16 +103,12 @@ class DWN:
             data = self.clean_frequency(data)
             print(data)
             # bits_to_data
-            '''result = []
-            for byte in range(0,128,8):
-                result.append(data[byte:byte+8])
-            print(result)
-            exit()
-            return result'''
-            return data
+            for i in range(0, len(data), 8):
+                result.append(data[i:i * 8])
+            return data, result
         except KeyboardInterrupt:
             data = self.clean_frequency(data)
-            return data
+            return data, result
 
     def clean_frequency(self, data):
         """

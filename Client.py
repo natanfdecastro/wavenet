@@ -45,9 +45,9 @@ Asignación de variables y constantes globales
 socket = socket.socket()
 host = argv[2]
 port = int(argv[4])
-print("Generic public and private key")
+print(">>> Generic public and private key")
 private, public = generate_keys()
-print("Connecting to host...")
+print(">>> Connecting to host...")
 socket.connect((host, port))
 dwn = DWN()
 
@@ -63,11 +63,9 @@ def get_public_keys(socket_, command):
     """
     socket_.send(bytes(command, 'UTF-8'))
     data = socket_.recv(4096)
-    print('Largo de la ostia recibida', len(data))
     data = data.decode('UTF-8')
     print("Data: ", data)
     keys = data.split(' | ')
-    print(keys)
     public_keys = [RSA.import_key(i) for i in keys]
     return public_keys
 
@@ -112,7 +110,7 @@ def receive_data():
     un error de valor.
     """
     print("Listening...")
-    data = dwn.listen()
+    _, data = dwn.listen()
     print(data)
     data = data_to_bits(data)
     try:
@@ -135,11 +133,8 @@ def send_data(socket_, command):
     source = abs(hash(host))
     destination = abs(hash(command[4:]))
     public_keys = get_public_keys(socket_, command)
-    for i in public_keys:
-        print(type(i))
     file_name = input('>>> File path: ')
 
-    # todo probar
     if os.path.isdir(file_name):
         exit()
     if not (os.path.isdir(file_name) or os.path.isfile(file_name)):
@@ -150,8 +145,8 @@ def send_data(socket_, command):
     file_binary = get_file_binaries(file_name)
     init_package = create_packets_from_bins(source, destination, file_binary, 1)
     print("Init: ", init_package)
-    # init_package = cipher_data(init_package, public_keys[-1])
-    '''for key in public_keys[1:-1]:
+    init_package = cipher_data(init_package, public_keys[-1])
+    for key in public_keys[1:-1]:
         init_package = create_packets_from_bins(source, destination, init_package, 1)
         print('2', init_package)
         init_package = cipher_data(init_package, key)
@@ -159,7 +154,7 @@ def send_data(socket_, command):
     init_package = create_packets_from_bins(source, destination, init_package, 1)
     print('4', init_package)
     init_package = cipher_data(init_package, public_keys[0])
-    print('fin', init_package)'''
+    print('fin', init_package)
     init_package = [[int(n) for n in bin(byte)[2:].zfill(8)] for byte in init_package]
     # init_package = create_bin_packets(1, 2, init_package, version=1)
     print(init_package)
